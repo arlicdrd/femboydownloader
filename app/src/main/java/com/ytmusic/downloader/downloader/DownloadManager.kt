@@ -5,65 +5,63 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import java.io.File
 
-enum class AudioFormat(val ext: String, val ffmpegArgs: Array<String>) {
-    MP3("mp3", arrayOf("-codec:a", "libmp3lame", "-q:a", "0")),
-    M4A("m4a", arrayOf("-codec:a", "aac", "-b:a", "256k")),
-    FLAC("flac", arrayOf("-codec:a", "flac"))
+enum class AudioFormat(val ext: String, val ytdlpFormat: String) {
+    MP3("mp3", "mp3"),
+    M4A("m4a", "m4a"),
+    FLAC("flac", "flac")
 }
 
 /**
- * Seal-pattern downloader: yt-dlp extracts bestaudio, FFmpeg converts.
+ * Seal-pattern downloader: one yt-dlp call with `--extract-audio`.
+ * yt-dlp auto-wires `--ffmpeg-location` to the bundled native binary
+ * (see YoutubeDL.execute source), so extraction + conversion to the
+ * target format happen in a single step.
  * YouTube Music URLs only (music.youtube.com / youtube.com/watch).
- *
- * Progress is coarse-grained (yt-dlp callbacks are non-suspending, so exact
- * percentages can't be re-emitted from a Flow): Started -> Downloading ->
- * Converting -> Done/Error. WorkManager shows these in its notification.
  */
 class DownloadManager(private val context: Context) {
 
-    fun download(videoId: String, format: AudioFormat, outDir: File): Flow<DownloadState> = flow {
-        emit(DownloadState.Started(0))
-        val url = "https://music.youtube.com/watch?v=$videoId"
+    fun download(videoId: String, format: AudioFormat, outDir: File): Flow<DownloadState> =
+        callbackFlow {
+            trySend(DownloadState.Started(0))
+            val url = "https://music.youtube.com/watch?v=$videoId"
 
-        val request = YoutubeDLRequest(url).apply {
-            addOption("--no-playlist")
-            addOption("--extract-audio")
-            addOption("-f", "bestaudio/best")
-            addOption("--audio-quality", "0")
-            addOption("-o", File(outDir, "$videoId.%(ext)s").absolutePath)
-        }
+            val request = YoutubeDLRequest(url).apply {
+                addOption("--no-playlist")
+                addOption("-f", "bestaudio/best")
+                addOption("--extract-audio")
+                addOption("--audio-format", format.ytdlpFormat)
+                addOption("--audio-quality", "0")
+                addOption("--no-embed-chapters")
+                addOption("-o", File(outDir, "%(id)s.%(ext)s").absolutePath)
+            }
 
-        emit(DownloadState.Downloading(10))
-        try {
-            YoutubeDL.getInstance().execute(request, "$videoId-dl")
-        } catch (e: Exception) {
-            emit(DownloadState.Error(e.message ?: "yt-dlp failed"))
-            return@flow
-        }
+            try {
+                // Blocking call; progress callback runs on yt-dlp's stdout
+                // reader thread — trySend is thread-safe.
+                YoutubeDL.getInstance().execute(request, "dl-$videoId") { progress, _, _ ->
+                    trySend(DownloadState.Downloading(progress.toInt().coerceIn(0, 100)))
+                }
+            } catch (e: Exception) {
+                trySend(DownloadState.Error(e.message ?: "yt-dlp failed"))
+                close()
+                return@callbackFlow
+            }
 
-        emit(DownloadState.Converting(80))
-        val raw = outDir.listFiles()?.firstOrNull {
-            it.name.startsWith(videoId) && it.isFile
-        }
-        if (raw == null) {
-            emit(DownloadState.Error("audio stream not found"))
-            return@flow
-        }
-        val dest = File(outDir, "$videoId.${format.ext}")
-        try {
-            val args = mutableListOf("-y", "-i", raw.absolutePath) +
-                format.ffmpegArgs.toList() + listOf(dest.absolutePath)
-            com.yausername.ffmpeg.FFmpeg.getInstance().execute(args.toTypedArray())
-            if (raw.absolutePath != dest.absolutePath) runCatching { raw.delete() }
-            emit(DownloadState.Done(dest))
-        } catch (e: Exception) {
-            emit(DownloadState.Error("convert failed: ${e.message}"))
-        }
-    }.flowOn(Dispatchers.IO)
+            val expected = File(outDir, "$videoId.${format.ext}")
+            val result = when {
+                expected.exists() -> expected
+                else -> outDir.listFiles()?.firstOrNull {
+                    it.isFile && it.name.startsWith(videoId)
+                }
+            }
+            if (result != null) trySend(DownloadState.Done(result))
+            else trySend(DownloadState.Error("audio file not produced"))
+            close()
+        }.flowOn(Dispatchers.IO)
 
     /** Terminal + progress states consumed by TrackDownloadWorker notification. */
     sealed interface DownloadState {

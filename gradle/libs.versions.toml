@@ -14,7 +14,9 @@ ktor = "2.3.12"
 serialization = "1.7.3"
 coil = "2.6.0"
 jaudiotagger = "3.0.1"
-youtubedl = "0.17.0"
+# Maintained yt-dlp wrapper fork (MavenCentral, same com.yausername.* API as upstream).
+# Confirmed against Seal's catalog: io.github.junkfood02.youtubedl-android:*:0.17.3
+youtubedl = "0.17.3"
 coroutines = "1.9.0"
 hilt = "2.51.1"
 
@@ -43,10 +45,11 @@ kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 jaudiotagger = { module = "net.jthink:jaudiotagger", version.ref = "jaudiotagger" }
-# Seal / yausername yt-dlp wrapper (JitPack). Alternative maintained fork on MavenCentral:
-# io.github.junkfood02.youtubedl-android:library:0.4.0
-youtubedl-library = { module = "com.github.yausername.youtubedl-android:library", version.ref = "youtubedl" }
-youtubedl-ffmpeg = { module = "com.github.yausername.youtubedl-android:ffmpeg", version.ref = "youtubedl" }
+# Seal-pattern yt-dlp wrapper: maintained JunkFood02 fork on MavenCentral
+# (group io.github.junkfood02.youtubedl-android, same com.yausername.* API).
+# JitPack is kept as a fallback repo only.
+youtubedl-library = { module = "io.github.junkfood02.youtubedl-android:library", version.ref = "youtubedl" }
+youtubedl-ffmpeg = { module = "io.github.junkfood02.youtubedl-android:ffmpeg", version.ref = "youtubedl" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

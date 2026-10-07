@@ -40,9 +40,10 @@ provider family Metrolist and SongSync rely on — embedded as synced LRC.
 - Streaming/library concept: [Metrolist](https://github.com/MetrolistGroup/Metrolist) (InnerTube + Media3).
 - Download engine concept: [Seal](https://github.com/JunkFood02/Seal) (yt-dlp + FFmpeg + metadata embedding).
 - Lyrics concept: LrcLib, as used by Metrolist / [SongSync](https://github.com/Lambada10/SongSync).
-- yt-dlp wrapper: `com.github.yausername.youtubedl-android` (JitPack). If JitPack
-  resolution fails, switch to the maintained MavenCentral fork
-  `io.github.junkfood02.youtubedl-android:library` in `gradle/libs.versions.toml`.
+- yt-dlp wrapper: `io.github.junkfood02.youtubedl-android:library:ffmpeg:0.17.3`
+  (JunkFood02's maintained fork of yausername's wrapper, same `com.yausername.*`
+  API — verified against source; yt-dlp auto-wires `--ffmpeg-location` to the
+  bundled native binary, so `--extract-audio` converts in one step).
 - jaudiotagger artifact is `net.jthink:jaudiotagger:3.0.1` (there is no
   `org.mordan:jaudiotagger`).
 - InnerTube `apiKey`/`clientVersion` drift over time — if search breaks, pull
