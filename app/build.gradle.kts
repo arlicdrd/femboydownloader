@@ -51,12 +51,6 @@ android {
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-    maven("https://jitpack.io")
-}
-
 dependencies {
     implementation(libs.androidx.core)
     implementation(libs.lifecycle.runtime)
