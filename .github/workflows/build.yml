@@ -36,14 +36,13 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-      # AGP 8.5.2 requires Gradle 8.7 exactly; the runner image may ship a
-      # newer system Gradle, so always install 8.7 and prefer it.
-      - name: Install Gradle 8.7
+      # AGP 8.7.2 requires Gradle 8.9 minimum; install it explicitly.
+      - name: Install Gradle 8.9
         run: |
-          curl -L -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
-          rm -rf /tmp/gradle-8.7
+          curl -L -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.9-bin.zip
+          rm -rf /tmp/gradle-8.9
           unzip -q /tmp/gradle.zip -d /tmp
-          echo "/tmp/gradle-8.7/bin" >> "$GITHUB_PATH"
+          echo "/tmp/gradle-8.9/bin" >> "$GITHUB_PATH"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -53,7 +52,7 @@ jobs:
           if [ -f gradle/wrapper/gradle-wrapper.jar ]; then
             ./gradlew assembleDebug --stacktrace
           else
-            /tmp/gradle-8.7/bin/gradle assembleDebug --stacktrace
+            /tmp/gradle-8.9/bin/gradle assembleDebug --stacktrace
           fi
 
       - name: Upload Debug APK
