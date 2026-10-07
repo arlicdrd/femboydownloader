@@ -1,0 +1,57 @@
+[versions]
+agp = "8.5.2"
+kotlin = "2.0.20"
+composeCompiler = "2.0.20"
+core = "1.13.1"
+lifecycle = "2.8.6"
+activityCompose = "1.9.2"
+composeBom = "2024.09.03"
+media3 = "1.5.1"
+work = "2.9.0"
+room = "2.6.1"
+datastore = "1.1.1"
+ktor = "2.3.12"
+serialization = "1.7.3"
+coil = "2.6.0"
+jaudiotagger = "3.0.1"
+youtubedl = "0.17.0"
+coroutines = "1.9.0"
+hilt = "2.51.1"
+
+[libraries]
+androidx-core = { module = "androidx.core:core-ktx", version.ref = "core" }
+lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-icons = { module = "androidx.compose.material:material-icons-extended" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+media3-datasource = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "media3" }
+work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+datastore-prefs = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+ktor-client = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-json = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+jaudiotagger = { module = "net.jthink:jaudiotagger", version.ref = "jaudiotagger" }
+# Seal / yausername yt-dlp wrapper (JitPack). Alternative maintained fork on MavenCentral:
+# io.github.junkfood02.youtubedl-android:library:0.4.0
+youtubedl-library = { module = "com.github.yausername.youtubedl-android:library", version.ref = "youtubedl" }
+youtubedl-ffmpeg = { module = "com.github.yausername.youtubedl-android:ffmpeg", version.ref = "youtubedl" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version = "2.0.20-1.0.25" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

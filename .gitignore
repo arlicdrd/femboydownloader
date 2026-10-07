@@ -1,0 +1,11 @@
+# ytmusic-downloader
+*.iml
+.gradle/
+/local.properties
+/.idea/
+/build/
+/app/build/
+.DS_Store
+*.apk
+*.aab
+local.properties
