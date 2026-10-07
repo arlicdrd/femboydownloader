@@ -76,10 +76,15 @@ class InnerTubeClient {
         }.body()
         val formats = body["streamingData"]?.jsonObject
             ?.get("adaptiveFormats")?.jsonArray ?: throw IllegalStateException("no streams")
-        // Prefer highest-bitrate audio-only mp4/m4a stream (Metrolist does the same).
-        val audio = formats.mapNotNull { runCatching { json.decodeFromString<StreamFormat>(it.toString()) }.getOrNull() }
-            .filter { it.mimeType.startsWith("audio/") }
-            .maxByOrNull { it.bitrate ?: 0 }
+        // Manual extraction avoids serializer mismatch (bitrate can be String or Int).
+        val audio = formats.mapNotNull { elem ->
+            val obj = elem.jsonObject
+            val mime = obj["mimeType"]?.jsonPrimitive?.content?.toString() ?: ""
+            if (!mime.startsWith("audio/")) return@mapNotNull null
+            val url = obj["url"]?.jsonPrimitive?.content?.toString() ?: ""
+            val bitrate = obj["bitrate"]?.jsonPrimitive?.content?.toString()?.toLongOrNull()
+            if (url.isNotBlank()) StreamFormat(mime, bitrate?.toInt(), url) else null
+        }.maxByOrNull { it.bitrate ?: 0 }
             ?: throw IllegalStateException("no audio stream")
         return audio.url
     }
@@ -200,8 +205,7 @@ class InnerTubeClient {
     }
 }
 
-@Serializable
-private data class StreamFormat(val mimeType: String = "", val bitrate: Int? = null, val url: String = "")
+private data class StreamFormat(val mimeType: String, val bitrate: Int?, val url: String)
 
 data class YTSong(
     val videoId: String,
