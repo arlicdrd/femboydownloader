@@ -49,6 +49,16 @@ android {
             useLegacyPackaging = false
         }
     }
+
+    // Split APKs by ABI so each download only contains its native libs (~35 MB each)
+    splits {
+        abi {
+            enable = true
+            reset()
+            include "arm64-v8a", "armeabi-v7a", "x86", "x86_64"
+            universalApk = false
+        }
+    }
 }
 
 dependencies {
